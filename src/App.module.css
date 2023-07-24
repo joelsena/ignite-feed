@@ -1,0 +1,12 @@
+.wrapper {
+    max-width: 70rem;
+    margin: 2rem auto;
+    padding: 0 1rem;
+
+    display: grid;
+    grid-template-columns: 256px 1fr;
+    gap: 2rem;
+    
+    /* align the items to the top without stretching the items so they have the same height */
+    align-items: flex-start;
+}
