@@ -10,3 +10,14 @@
     /* align the items to the top without stretching the items so they have the same height */
     align-items: flex-start;
 }
+
+
+@media (max-width: 768px) {
+    html {
+        font-size: 87.5%;
+    }
+
+    .wrapper {
+        grid-template-columns: 1fr;
+    }
+}
