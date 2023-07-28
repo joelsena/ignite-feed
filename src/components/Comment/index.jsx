@@ -2,8 +2,10 @@ import { ThumbsUp, Trash } from "phosphor-react";
 import { Avatar } from "../Avatar";
 
 import styles from "./styles.module.css";
+import { useState } from "react";
 
-export function Comment() {
+/* eslint-disable react/prop-types */
+export function Comment({ id, content, deleteComment, likeComment, likes }) {
 	return (
 		<div className={styles.comment}>
 			<Avatar
@@ -22,18 +24,18 @@ export function Comment() {
 							</time>
 						</div>
 
-						<button title="Deletar comentário">
+						<button onClick={deleteComment} title="Deletar comentário">
 							<Trash size={24} />
 						</button>
 					</header>
 
-					<p>Muito bom Devon, parabéns!! 👏👏</p>
+					<p>{content}</p>
 				</div>
 
 				<footer>
-					<button>
+					<button onClick={likeComment}>
 						<ThumbsUp size={20} />
-						Aplaudir <span>20</span>
+						Aplaudir <span>{likes}</span>
 					</button>
 				</footer>
 			</div>

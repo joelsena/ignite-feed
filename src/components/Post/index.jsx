@@ -1,48 +1,104 @@
+import { format, formatDistanceToNow } from "date-fns";
+import ptBR from "date-fns/locale/pt-BR";
+
 import { Avatar } from "../Avatar";
 import { Comment } from "../Comment";
 
 import styles from "./styles.module.css";
+import { useState } from "react";
 
 /* eslint-disable react/prop-types */
-export function Post() {
+export function Post({ author, publishedAt, content, postComments = [] }) {
+	const [comments, setComments] = useState(postComments);
+	const [newCommentText, setNewCommentText] = useState("");
+
+	const formattedPublishedDate = format(publishedAt, "d 'de' LLLL 'às' HH:mm", {
+		locale: ptBR,
+	});
+
+	function handleCreateComment(e) {
+		e.preventDefault();
+
+		if (!newCommentText) {
+			return;
+		}
+
+		setComments((prevComments) => [
+			...prevComments,
+			{ id: prevComments.length * 3 + 1, content: newCommentText, likes: 0 },
+		]);
+		setNewCommentText("");
+	}
+
+	function handleCommentTextChange(e) {
+		e.target.setCustomValidity("");
+		setNewCommentText(e.target.value);
+	}
+
+	function handleDeleteComment(id) {
+		setComments((prevComments) =>
+			prevComments.filter((comment) => comment.id !== id)
+		);
+	}
+
+	function handleNewInvalidComment(e) {
+		e.target.setCustomValidity("Esse campo é obrigatório");
+	}
+
+	function handleAddLikeComment(id) {
+		setComments((prevComments) =>
+			prevComments.map((comment) =>
+				comment.id === id ? { ...comment, likes: comment.likes + 1 } : comment
+			)
+		);
+	}
+
 	return (
 		<article className={styles.post}>
 			<header>
 				<div className={styles.author}>
-					<Avatar src="https://github.com/joelsena.png" alt="perfil" />
+					<Avatar src={author.avatarUrl} alt="perfil" />
 					<div className={styles.authorInfo}>
-						<strong>Joel Sena</strong>
-						<span>Web Developer</span>
+						<strong>{author.name}</strong>
+						<span>{author.role}</span>
 					</div>
 				</div>
 
-				<time title="25 de julho ás 10h" dateTime="2023-07-25 10:00:00">
-					Publicado há 1h
+				<time
+					title={formattedPublishedDate}
+					dateTime={publishedAt.toISOString()}
+				>
+					{formatDistanceToNow(publishedAt, {
+						addSuffix: true,
+						locale: ptBR,
+					})}
 				</time>
 			</header>
 
 			<div className={styles.content}>
-				<p>Fala galeraa 👋</p>
-
-				<p>
-					Acabei de subir mais um projeto no meu portifa. É um projeto que fiz
-					no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀
-				</p>
-
-				<p>
-					👉 <a href="#">jane.design/doctorcare</a>
-				</p>
-
-				<p>
-					<a href="#">#novoprojeto</a> <a href="#">#nlw</a>{" "}
-					<a href="#">#rocketseat</a>
-				</p>
+				{content.map((line, lineIdx) => {
+					if (line.type === "paragraph") {
+						return <p key={lineIdx * 3 + 1}>{line.content}</p>;
+					} else if (line.type === "link") {
+						return (
+							<p key={lineIdx * 3 + 1}>
+								<a href="#">{line.content}</a>
+							</p>
+						);
+					}
+				})}
 			</div>
 
-			<form className={styles.commentForm}>
+			<form onSubmit={handleCreateComment} className={styles.commentForm}>
 				<strong>Deixe seu feedback</strong>
 
-				<textarea placeholder="Deixe um comentário" />
+				<textarea
+					value={newCommentText}
+					placeholder="Deixe um comentário"
+					onChange={handleCommentTextChange}
+					onInvalid={handleNewInvalidComment}
+					required
+				/>
 
 				<footer>
 					<button type="submit">Publicar</button>
@@ -50,9 +106,14 @@ export function Post() {
 			</form>
 
 			<div className={styles.commetnList}>
-				<Comment />
-				<Comment />
-				<Comment />
+				{comments.map((comment) => (
+					<Comment
+						key={comment.id}
+						deleteComment={() => handleDeleteComment(comment.id)}
+						likeComment={() => handleAddLikeComment(comment.id)}
+						{...comment}
+					/>
+				))}
 			</div>
 		</article>
 	);
